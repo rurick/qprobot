@@ -76,7 +76,7 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	// используя конфиг u создаем канал в который будут прилетать новые сообщения
-	updates, err := bot.GetUpdatesChan(u)
+	updates := bot.GetUpdatesChan(u)
 	log.Println("OK")
 
 	//основной цикл чтения каналов

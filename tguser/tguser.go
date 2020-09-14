@@ -12,7 +12,7 @@ import (
 )
 
 //SetLastMsgID -
-func (u *TgUser) SetLastMsgID(msgID int64) {
+func (u *TgUser) SetLastMsgID(msgID int) {
 	col := dbClient.Database("qprobot").Collection("lastMsgIDs")
 	opts := options.Update().SetUpsert(true)
 	filter := bson.M{"UID": u.ID}
@@ -30,10 +30,10 @@ func (u *TgUser) SetLastMsgID(msgID int64) {
 }
 
 //GetLastMsgID -
-func (u *TgUser) GetLastMsgID() int64 {
+func (u *TgUser) GetLastMsgID() int {
 	type mt struct {
-		UID   int64
-		MsgID int64
+		UID   int
+		MsgID int
 	}
 	col := dbClient.Database("qprobot").Collection("lastMsgIDs")
 	filter := bson.M{"UID": u.ID}
