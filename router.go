@@ -50,10 +50,8 @@ func pageStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *
 func actStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *tgbotapi.BotAPI) bool {
 	// Клик по кнопке обхъявления
 	if update.Message.Text == ButtonAds {
-		del := tgbotapi.NewDeleteMessage(chatID, update.Message.MessageID)
-		bot.Send(del)
 		user.SetState("root/ads")
-		Router(update, chatID, user, bot)
+		ads.PageStart(update, chatID, user, bot)
 		return true
 	}
 	return false

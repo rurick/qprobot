@@ -34,7 +34,7 @@ type Ad struct {
 	ID          primitive.ObjectID `bson:"_id"`
 	Title       string             //заголовок
 	Description string
-	Category    string
+	Category    []string
 	Address     location.Address
 	Price       int64
 	UserID      int64             //user ID в телеграме
@@ -65,14 +65,14 @@ var AdsCount = make(map[string]CntItem)
 
 //Count - считает количество объявлений в рубрике(кеширует в модуле)
 func Count(rubric string) int64 {
-	calc := false
+	calc := false //признак что наджо пересчитать
 	if r, ok := AdsCount[rubric]; ok {
 		dl := r.Time.Add(time.Minute * 10)
 		if dl.Before(time.Now()) {
 			//время жизни значения 10 минут. потом пересчитать
 			calc = true
 		}
-	} else {
+	} else { //если такой еще нет
 		AdsCount[rubric] = CntItem{
 			Count: 0,
 			Time:  time.Now(),
@@ -90,7 +90,7 @@ func Count(rubric string) int64 {
 			filter = bson.M{}
 
 		} else {
-			filter = bson.M{"rubric": rubric}
+			filter = bson.M{"rubric": bson.M{"$in": rubric}}
 		}
 		if cnt, err = collection.CountDocuments(context.TODO(), filter); err != nil {
 			log.Printf("ERROR IN COUNT: %s", err)
