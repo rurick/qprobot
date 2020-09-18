@@ -40,11 +40,16 @@ func Run(update *tgbotapi.Update, bot *tgbotapi.BotAPI, dbClient *mongo.Client) 
 
 	log.Println(inMsg)
 
-	//Проверка команд
-	if update.Message.Command() == "start" {
-		pageStart(update, chatID, &user, bot)
-	} else {
-		Router(update, chatID, &user, bot)
+	if update.Message != nil {
+		//Проверка команд
+		if update.Message.Command() == "start" {
+			pageStart(update, chatID, &user, bot)
+		} else {
+			Router(update, chatID, &user, bot)
+		}
+	}
+	if update.CallbackQuery != nil {
+		RouterCalback(update, chatID, &user, bot)
 	}
 
 }

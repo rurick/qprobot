@@ -8,6 +8,17 @@ import (
 	"github.com/tgbotapi"
 )
 
+//RouterCalback выполняем маршрутизация запроса
+func RouterCalback(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *tgbotapi.BotAPI) {
+	path := strings.Split(user.State, "/")
+	if len(path) > 1 {
+		switch path[1] {
+		case "ads":
+			ads.RouterCalback(update, chatID, user, bot)
+		}
+	}
+}
+
 //Router выполняем маршрутизация запроса
 func Router(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *tgbotapi.BotAPI) {
 	path := strings.Split(user.State, "/")
@@ -50,8 +61,8 @@ func pageStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *
 func actStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *tgbotapi.BotAPI) bool {
 	// Клик по кнопке обхъявления
 	if update.Message.Text == ButtonAds {
-		user.SetState("root/ads")
-		ads.PageStart(update, chatID, user, bot)
+		user.SetState("root/ads/0")
+		ads.PageStart(update, chatID, user, bot, 0)
 		return true
 	}
 	return false

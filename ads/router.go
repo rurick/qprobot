@@ -6,35 +6,38 @@ import (
 	"strings"
 
 	"../ad"
+	"../botlib"
 	"../tguser"
 
 	"github.com/tgbotapi"
 )
 
+//RouterCalback выполняем маршрутизация запроса
+func RouterCalback(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *tgbotapi.BotAPI) {
+	switch update.CallbackQuery.Data {
+	case "nextPage:":
+		user.SetState("root/ads/1")
+		Router(update, chatID, user, bot)
+	case "prevPage:":
+		user.SetState("root/ads/0")
+		Router(update, chatID, user, bot)
+	}
+}
+
 //Router выполняем маршрутизация запроса
 func Router(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *tgbotapi.BotAPI) {
 	path := strings.Split(user.State, "/")
-	if len(path) == 2 {
-		if !actStart(update, chatID, user, bot) {
-			PageStart(update, chatID, user, bot)
-		}
+	if path[1] == "ads" {
+		botlib.DeleteIncomingMsg(update, chatID, bot)
+		page, _ := strconv.Atoi(path[2])
+		PageStart(update, chatID, user, bot, page)
 	}
 	if len(path) > 2 {
 	}
 }
 
-func actStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *tgbotapi.BotAPI) bool {
-	if update.Message.Text == "🔎 Объявления" {
-		del := tgbotapi.NewDeleteMessage(chatID, update.Message.MessageID)
-		bot.Send(del)
-		return true
-	}
-	return false
-
-}
-
 //PageStart - первая страница объявлений с рубриками
-func PageStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *tgbotapi.BotAPI) {
+func PageStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *tgbotapi.BotAPI, page int) {
 	text := "<b>Объявления</b>\n\n" +
 		strconv.Itoa(int(ad.Count("total"))) + " объявлений\n"
 	reply := tgbotapi.NewMessage(chatID, text)
@@ -47,7 +50,8 @@ func PageStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	for k := 0; k < len(keys); k++ {
+	l := len(keys)
+	for k := l / 2 * page; k < l/2*(page+1); k++ {
 		row := tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				keys[k]+" (...)",
@@ -56,10 +60,14 @@ func PageStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *
 		)
 		inlineKB = append(inlineKB, row)
 	}
-	row := tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(
-		"Избранное ❤️",
-		"favorits:",
-	))
+	newxtbtn := tgbotapi.NewInlineKeyboardButtonData("след. стр. ⏩", "nextPage:")
+	if page > 0 {
+		newxtbtn = tgbotapi.NewInlineKeyboardButtonData("⏪ пред. стр.", "prevPage:")
+	}
+	row := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Избранное ❤️", "favorits:"),
+		newxtbtn,
+	)
 	inlineKB = append(inlineKB, row)
 	reply.ReplyMarkup = tgbotapi.InlineKeyboardMarkup{InlineKeyboard: inlineKB}
 	//--
@@ -76,7 +84,7 @@ func PageStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
-		for k := 0; k < len(keys); k++ {
+		for k := l / 2 * page; k < l/2*(page+1); k++ {
 			c := int(ad.Count(keys[k]))
 			if c == 0 { //не выводить пустые рубрики
 				//continue
@@ -89,10 +97,10 @@ func PageStart(update *tgbotapi.Update, chatID int64, user *tguser.TgUser, bot *
 			)
 			inlineKB = append(inlineKB, row)
 		}
-		row := tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(
-			"Избранное ❤️",
-			"favorits:",
-		))
+		row := tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Избранное ❤️", "favorits:"),
+			newxtbtn,
+		)
 		inlineKB = append(inlineKB, row)
 		reply := tgbotapi.NewEditMessageReplyMarkup(chatID, msgID, tgbotapi.InlineKeyboardMarkup{InlineKeyboard: inlineKB})
 		bot.Send(reply)

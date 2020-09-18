@@ -11,6 +11,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/tgbotapi"
@@ -28,11 +30,15 @@ var configuration Config
 
 //инициализация приложения
 func init() {
-	file, _ := os.Open("config.json")
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	file, _ := os.Open(path.Join(dir, "config.json"))
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	configuration = Config{}
-	err := decoder.Decode(&configuration)
+	err = decoder.Decode(&configuration)
 	if err != nil {
 		log.Panic(err)
 	}
