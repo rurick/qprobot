@@ -9,8 +9,10 @@ import (
 
 //DeleteIncomingMsg  удалит входящее сообщение
 func DeleteIncomingMsg(update *tgbotapi.Update, chatID int64, bot *tgbotapi.BotAPI) {
-	del := tgbotapi.NewDeleteMessage(chatID, update.Message.MessageID)
-	bot.Send(del)
+	if update.Message != nil {
+		del := tgbotapi.NewDeleteMessage(chatID, update.Message.MessageID)
+		bot.Send(del)
+	}
 }
 
 /*Cut * Обрезка строки

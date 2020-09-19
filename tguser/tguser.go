@@ -49,19 +49,14 @@ func (u *TgUser) GetLastMsgID() int {
 //db.users.createIndex({"Username" : 1}, {"unique" : true})
 type TgUser struct {
 	ID        int64
-	Username  string //телеграм имя
-	Name      string //имя
-	Phone     string //телефон
-	State     string //текущее состояние. Где и в каком месте находится пользователь
-	StateBack string //пердыдущее состояние. Куда возвращаться
-	Location  struct {
-		Longitude float64
-		Latitude  float64
-	} //текущее состояние. Где и в каком месте находится пользователь
-	LastVisit time.Time            //Время последнего визита
-	Ads       []primitive.ObjectID //объявления пользователя
-	AddingAd  primitive.ObjectID   //Добавляемое сейчас ad
-	AdData    interface{}          //данные для объявлений
+	Username  string    //телеграм имя
+	Name      string    //имя
+	Phone     string    //телефон
+	State     string    //текущее состояние. Где и в каком месте находится пользователь
+	StateBack string    //пердыдущее состояние. Куда возвращаться
+	LastVisit time.Time //Время последнего визита
+	InviterID int64
+	Balance   float64
 }
 
 var dbClient *mongo.Client
